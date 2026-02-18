@@ -1,5 +1,6 @@
-// Конфигурация
-const WS_URL = 'wss://zalupppppppp.onrender.com'; // ЗАМЕНИ НА СВОЙ URL!
+// КОНФИГУРАЦИЯ - ВАЖНО! Используй свой URL
+const WS_URL = 'wss://zalupppppppp.onrender.com'; // ЗАМЕНИ НА СВОЙ URL
+const HTTP_URL = 'https://zalupppppppp.onrender.com'; // Тот же URL, но с https://
 
 let ws = null;
 let myName = "Ч";
@@ -7,6 +8,7 @@ let currentRecipient = "Друн";
 let reconnectAttempts = 0;
 const maxReconnectAttempts = 50;
 
+// Функция добавления сообщения
 function addMessage(data, isOwn) {
     const messages = document.getElementById("messages");
     const msg = document.createElement("div");
@@ -21,91 +23,65 @@ function addMessage(data, isOwn) {
     messages.scrollTop = messages.scrollHeight;
 }
 
+// Подключение к WebSocket
 function connectWebSocket() {
-    console.log('🔄 Подключаюсь к серверу:', WS_URL);
-    console.log('Текущее время:', new Date().toLocaleString());
+    console.log('🔄 Подключение к WebSocket серверу...');
+    console.log('URL:', WS_URL);
+    console.log('HTTP URL:', HTTP_URL);
     
     try {
         ws = new WebSocket(WS_URL);
         
         ws.onopen = function() {
-            console.log('✅ WebSocket соединение открыто');
-            console.log('Протокол:', ws.protocol);
-            console.log('URL:', ws.url);
-            
+            console.log('✅ WebSocket подключен!');
             reconnectAttempts = 0;
             
             addMessage({
                 sender: "Система",
-                text: "✅ Соединение с сервером установлено",
+                text: "✅ Подключено к серверу",
                 time: getCurrentTime(),
                 system: true
             }, false);
             
-            // Отправляем регистрацию
-            const registerMsg = {
+            // Регистрируемся
+            ws.send(JSON.stringify({
                 register: myName
-            };
-            console.log('📤 Отправляю регистрацию:', registerMsg);
-            ws.send(JSON.stringify(registerMsg));
+            }));
         };
         
         ws.onmessage = function(event) {
-            console.log('📥 Получено сообщение от сервера:', event.data);
-            
+            console.log('📨 Получено:', event.data);
             try {
                 const data = JSON.parse(event.data);
-                console.log('📥 Распарсенные данные:', data);
-                
-                if (data.system) {
-                    addMessage(data, false);
-                } else {
-                    addMessage(data, false);
-                }
+                addMessage(data, false);
             } catch (e) {
-                console.error('❌ Ошибка парсинга сообщения:', e);
-                console.error('Сырые данные:', event.data);
+                console.error('Ошибка парсинга:', e);
             }
         };
         
         ws.onclose = function(event) {
-            console.log('❌ WebSocket соединение закрыто');
-            console.log('Код закрытия:', event.code);
-            console.log('Причина:', event.reason);
-            console.log('Был чистым?', event.wasClean);
+            console.log('❌ WebSocket отключен. Код:', event.code);
             
             addMessage({
                 sender: "Система",
-                text: `❌ Соединение закрыто (код: ${event.code})`,
+                text: `❌ Отключено от сервера (код: ${event.code})`,
                 time: getCurrentTime(),
                 system: true
             }, false);
             
-            // Переподключаемся с экспоненциальной задержкой
+            // Переподключаемся
             if (reconnectAttempts < maxReconnectAttempts) {
                 reconnectAttempts++;
-                const delay = Math.min(1000 * Math.pow(1.5, reconnectAttempts), 30000);
-                console.log(`🔄 Попытка переподключения ${reconnectAttempts}/${maxReconnectAttempts} через ${delay}мс...`);
-                setTimeout(connectWebSocket, delay);
+                setTimeout(connectWebSocket, 3000);
             }
         };
         
         ws.onerror = function(error) {
             console.error('❌ WebSocket ошибка:', error);
-            console.error('Тип ошибки:', error.type);
-            console.error('Event:', error);
-            
-            addMessage({
-                sender: "Система",
-                text: "⚠️ Ошибка соединения. Проверь консоль (F12)",
-                time: getCurrentTime(),
-                system: true
-            }, false);
         };
         
     } catch (e) {
-        console.error('❌ Критическая ошибка создания WebSocket:', e);
-        console.error('Стек ошибки:', e.stack);
+        console.error('❌ Ошибка создания WebSocket:', e);
     }
 }
 
@@ -126,8 +102,7 @@ function handleEnter(event) {
 
 function sendMessage() {
     if (!ws || ws.readyState !== WebSocket.OPEN) {
-        alert("❌ Нет соединения с сервером! Статус: " + (ws ? ws.readyState : 'нет соединения'));
-        console.log('WebSocket состояние:', ws ? ws.readyState : 'null');
+        alert("Нет соединения с сервером!");
         return;
     }
     
@@ -142,21 +117,16 @@ function sendMessage() {
         time: getCurrentTime()
     };
 
-    console.log('📤 Отправляю сообщение:', message);
-    
-    try {
-        ws.send(JSON.stringify(message));
-        addMessage(message, true);
-        input.value = "";
-    } catch (e) {
-        console.error('❌ Ошибка отправки:', e);
-        alert('Ошибка отправки сообщения');
-    }
+    console.log('📤 Отправка:', message);
+    ws.send(JSON.stringify(message));
+    addMessage(message, true);
+    input.value = "";
 }
 
-// Запускаем при загрузке
+// Запуск при загрузке
 window.onload = function() {
-    console.log('📄 Страница загружена, запускаю подключение...');
+    console.log('📄 Страница загружена');
     console.log('Браузер:', navigator.userAgent);
+    console.log('URL страницы:', window.location.href);
     connectWebSocket();
 };

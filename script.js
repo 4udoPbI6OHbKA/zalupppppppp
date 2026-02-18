@@ -1,5 +1,5 @@
 // Конфигурация
-const WS_URL = 'https://zalupppppppp.onrender.com'; // ЗАМЕНИТЕ НА СВОЙ URL!
+const WSS_URL = 'https://zalupppppppp.onrender.com'; // ЗАМЕНИТЕ НА СВОЙ URL!
 
 let ws = null;
 let myName = "Ч";

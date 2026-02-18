@@ -52,7 +52,12 @@ socket.on('connect_error', function(error) {
 // Получение сообщений
 socket.on('message', function(data) {
     console.log('Получено сообщение:', data);
-    addMessage(data, false);
+    
+    // Добавляем проверку: если сообщение не от себя (или от системы), показываем его
+    // Предполагаем, что сервер добавляет поле isOwn или sender
+    if (data.sender !== 'Я' && data.sender !== socket.id) {
+        addMessage(data, false);
+    }
 });
 
 function setRecipient(name) {
@@ -79,13 +84,15 @@ function sendMessage() {
         sender: 'Я',
         recipient: currentRecipient,
         text: text,
-        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
+        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'}),
+        // Добавляем уникальный ID для предотвращения дублирования
+        id: Date.now() + Math.random().toString(36).substr(2, 9)
     };
     
     // Отправляем на сервер
     socket.emit('message', message);
     
-    // Показываем в чате
+    // Показываем в чате (только локально)
     addMessage(message, true);
     
     // Очищаем поле ввода
@@ -95,8 +102,17 @@ function sendMessage() {
 function addMessage(data, isOwn) {
     if (!messagesDiv) return;
     
+    // Проверяем, нет ли уже такого сообщения (по id)
+    const existingMessages = messagesDiv.querySelectorAll('.message');
+    for (let msg of existingMessages) {
+        if (msg.dataset.messageId === data.id) {
+            return; // Сообщение уже есть, не добавляем повторно
+        }
+    }
+    
     const messageElement = document.createElement('div');
     messageElement.className = `message ${isOwn ? 'own' : 'their'}`;
+    messageElement.dataset.messageId = data.id || ''; // Сохраняем ID сообщения
     messageElement.innerHTML = `<b>${data.sender}</b> (${data.time})<br>${data.text}`;
     messagesDiv.appendChild(messageElement);
     

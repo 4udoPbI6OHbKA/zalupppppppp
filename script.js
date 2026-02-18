@@ -1,21 +1,21 @@
-// Определяем URL WebSocket в зависимости от окружения
-const WS_PORT = window.location.hostname === "localhost" ? 8765 : 8765;
-const WS_URL = window.location.hostname === "localhost" 
-    ? `ws://localhost:${WS_PORT}` 
-    : `wss://${window.location.hostname}:${WS_PORT}`;
+// Определяем URL для подключения
+const WS_PORT = window.location.port || (window.location.protocol === 'https:' ? '443' : '80');
+const WS_URL = `wss://${window.location.hostname}:10001`; // Явно указываем порт WebSocket
 
 console.log("Подключение к WebSocket:", WS_URL);
 
 let ws;
 let currentRecipient = "себе";
 let reconnectAttempts = 0;
-const maxReconnectAttempts = 5;
+const maxReconnectAttempts = 10;
 
 function connectWebSocket() {
     ws = new WebSocket(WS_URL);
     
     ws.onopen = function() {
-        console.log("Подключено к серверу");
+        console.log("✅ Подключено к серверу");
+        document.getElementById("connection-status").textContent = "🟢 Онлайн";
+        document.getElementById("connection-status").style.color = "#2ecc71";
         reconnectAttempts = 0;
         addMessage({ 
             sender: "Система", 
@@ -29,19 +29,15 @@ function connectWebSocket() {
             const data = JSON.parse(event.data);
             addMessage(data, false);
         } catch (e) {
-            console.error("Ошибка парсинга сообщения:", e);
+            console.error("Ошибка парсинга:", e);
         }
     };
 
     ws.onclose = function() {
-        console.log("Отключено от сервера");
-        addMessage({ 
-            sender: "Система", 
-            text: "Отключено от сервера. Переподключение...", 
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        }, false);
+        console.log("❌ Отключено от сервера");
+        document.getElementById("connection-status").textContent = "🔴 Офлайн";
+        document.getElementById("connection-status").style.color = "#e74c3c";
         
-        // Пытаемся переподключиться
         if (reconnectAttempts < maxReconnectAttempts) {
             reconnectAttempts++;
             setTimeout(connectWebSocket, 3000);
@@ -53,8 +49,10 @@ function connectWebSocket() {
     };
 }
 
-// Запускаем подключение
-connectWebSocket();
+// Запускаем через 1 секунду после загрузки страницы
+window.addEventListener('load', function() {
+    setTimeout(connectWebSocket, 1000);
+});
 
 function setRecipient(name) {
     currentRecipient = name;
@@ -84,10 +82,8 @@ function sendMessage() {
         addMessage(message, true);
         input.value = "";
     } else {
-        alert("Соединение с сервером потеряно. Пробуем переподключиться...");
-        if (ws.readyState === WebSocket.CLOSED) {
-            connectWebSocket();
-        }
+        alert("Нет подключения к серверу. Пробуем переподключиться...");
+        connectWebSocket();
     }
 }
 

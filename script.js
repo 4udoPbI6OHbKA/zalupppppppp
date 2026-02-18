@@ -21,9 +21,9 @@ if (recipientSpan) {
 
 // Подключение к серверу
 socket.on('connect', function() {
-    console.log('✅ Подключено к серверу');
+    console.log('Подключено к серверу');
     if (connectionStatus) {
-        connectionStatus.textContent = '🟢 Онлайн';
+        connectionStatus.textContent = 'Онлайн';
         connectionStatus.style.color = '#2ecc71';
     }
     addMessage({
@@ -34,9 +34,9 @@ socket.on('connect', function() {
 });
 
 socket.on('disconnect', function() {
-    console.log('❌ Отключено от сервера');
+    console.log('Отключено от сервера');
     if (connectionStatus) {
-        connectionStatus.textContent = '🔴 Офлайн';
+        connectionStatus.textContent = 'Офлайн';
         connectionStatus.style.color = '#e74c3c';
     }
 });
@@ -44,7 +44,7 @@ socket.on('disconnect', function() {
 socket.on('connect_error', function(error) {
     console.error('Ошибка подключения:', error);
     if (connectionStatus) {
-        connectionStatus.textContent = '⚠️ Ошибка';
+        connectionStatus.textContent = 'Ошибка';
         connectionStatus.style.color = '#f39c12';
     }
 });

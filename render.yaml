@@ -7,10 +7,3 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-    healthCheckPath: /
-    autoDeploy: true
-    ports:
-      - port: 10000
-        protocol: HTTP
-      - port: 8765
-        protocol: WebSocket

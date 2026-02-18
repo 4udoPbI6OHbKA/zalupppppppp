@@ -1,75 +1,50 @@
-import asyncio
-import websockets
-import json
+from flask import Flask, send_file, send_from_directory
+from flask_socketio import SocketIO, emit
 import os
-import threading
-import socket
-import http.server
-import socketserver
+import eventlet
+import eventlet.wsgi
 
-clients = set()
-PORT = int(os.environ.get("PORT", 10000))  # Render дает PORT
+# Патч для eventlet
+eventlet.monkey_patch()
 
-# WebSocket обработчик
-async def chat_handler(websocket):
-    clients.add(websocket)
-    print(f"Новый пользователь. Всего: {len(clients)}")
-    
-    try:
-        async for message in websocket:
-            data = json.loads(message)
-            print(f"Сообщение: {data}")
-            # Отправляем всем кроме отправителя
-            for client in clients:
-                if client != websocket:
-                    try:
-                        await client.send(json.dumps(data))
-                    except:
-                        pass
-    except websockets.exceptions.ConnectionClosed:
-        print("Клиент отключился")
-    finally:
-        clients.discard(websocket)
+app = Flask(__name__, static_folder='.')
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-# HTTP обработчик для статических файлов
-class HTTPHandler(http.server.SimpleHTTPRequestHandler):
-    def end_headers(self):
-        self.send_header('Access-Control-Allow-Origin', '*')
-        super().end_headers()
-    
-    def do_GET(self):
-        if self.path == '/':
-            self.path = '/index.html'
-        return super().do_GET()
+# Хранилище сообщений (для истории)
+messages = []
+users = set()
 
-# Функция для запуска HTTP сервера
-def run_http_server():
-    os.chdir(os.path.dirname(os.path.abspath(__file__)))
-    handler = HTTPHandler
-    
-    with socketserver.TCPServer(("0.0.0.0", PORT), handler) as httpd:
-        print(f"HTTP сервер запущен на порту {PORT}")
-        httpd.serve_forever()
+@app.route('/')
+def index():
+    return send_file('index.html')
 
-# Функция для запуска WebSocket сервера
-async def run_websocket_server():
-    # Используем другой порт для WebSocket
-    ws_port = PORT + 1  # 10001
-    async with websockets.serve(chat_handler, "0.0.0.0", ws_port):
-        print(f"WebSocket сервер запущен на порту {ws_port}")
-        await asyncio.Future()
+@app.route('/<path:path>')
+def static_files(path):
+    return send_from_directory('.', path)
 
-async def main():
-    # Запускаем HTTP в отдельном потоке
-    http_thread = threading.Thread(target=run_http_server, daemon=True)
-    http_thread.start()
-    
-    # Запускаем WebSocket
-    await run_websocket_server()
+@socketio.on('connect')
+def handle_connect():
+    print('Клиент подключился')
+    users.add(request.sid)
+    # Отправляем историю сообщений новому пользователю
+    for msg in messages[-50:]:  # последние 50 сообщений
+        emit('message', msg, room=request.sid)
 
-if __name__ == "__main__":
-    print(f"Сервер запускается... PORT={PORT}")
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("\nСервер остановлен")
+@socketio.on('disconnect')
+def handle_disconnect():
+    print('Клиент отключился')
+    users.discard(request.sid)
+
+@socketio.on('message')
+def handle_message(data):
+    print(f'Получено сообщение: {data}')
+    # Добавляем в историю
+    messages.append(data)
+    # Отправляем всем
+    emit('message', data, broadcast=True)
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 10000))
+    print(f"Сервер запускается на порту {port}")
+    socketio.run(app, host='0.0.0.0', port=port, debug=False)

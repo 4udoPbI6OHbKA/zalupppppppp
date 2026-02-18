@@ -1,5 +1,5 @@
 // Конфигурация
-const WS_URL = 'wss://messenger.onrender.com'; // ЗАМЕНИ НА СВОЙ URL!
+const WS_URL = 'wss://zalupppppppp.onrender.com'; // ЗАМЕНИ НА СВОЙ URL!
 
 let ws = null;
 let myName = "Ч";

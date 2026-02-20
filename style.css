@@ -165,3 +165,27 @@
         button:hover {
             background: #2980b9;
         }
+
+                .player-link {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+            padding: 5px 15px;
+            background: #00d970;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: background 0.3s;
+            float: right;
+        }
+        
+        .player-link:hover {
+            background: #00a88c;
+        }
+        
+        .status-bar {
+            background: #333;
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            overflow: hidden;
+        }

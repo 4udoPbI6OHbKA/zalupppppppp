@@ -83,19 +83,26 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 60px;
     border: 2px solid #ffd700;
+    overflow: hidden;
 }
 
-.reel.spinning {
-    animation: spin 0.1s linear infinite;
-    opacity: 0.8;
+.symbol-img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
-@keyframes spin {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
+.reel.spinning .symbol-img {
+    animation: spinImage 0.1s linear infinite;
+}
+
+@keyframes spinImage {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(1.1) rotate(5deg); }
+    50% { transform: scale(1) rotate(0deg); }
+    75% { transform: scale(1.1) rotate(-5deg); }
+    100% { transform: scale(1) rotate(0deg); }
 }
 
 .controls {

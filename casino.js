@@ -1,8 +1,6 @@
-// Начальный баланс
 let balance = 10000;
 let isSpinning = false;
 
-// Пути к изображениям
 const symbols = [
     { file: 'cherry.png', name: 'cherry', multiplier: 2 },
     { file: 'orange.png', name: 'orange', multiplier: 3 },
@@ -13,10 +11,8 @@ const symbols = [
     { file: 'jackpot.png', name: 'jackpot', multiplier: 10 }
 ];
 
-// Для обратной совместимости с эмодзи (оставляем для определения множителей)
 const symbolNames = ['cherry', 'orange', 'grape', 'lemon', 'seven', 'diamond', 'jackpot'];
 
-// Элементы DOM
 const balanceEl = document.getElementById('balance');
 const reel1 = document.getElementById('reel1');
 const reel2 = document.getElementById('reel2');
@@ -25,7 +21,6 @@ const spinBtn = document.getElementById('spinBtn');
 const resultEl = document.getElementById('result');
 const betInput = document.getElementById('betAmount');
 
-// Загрузка баланса
 function loadBalance() {
     const saved = localStorage.getItem('casinoBalance');
     if (saved) {
@@ -34,24 +29,20 @@ function loadBalance() {
     updateBalance();
 }
 
-// Сохранение баланса
 function saveBalance() {
     localStorage.setItem('casinoBalance', balance);
 }
 
-// Обновление отображения баланса
 function updateBalance() {
     if (balanceEl) {
         balanceEl.textContent = balance.toFixed(0);
     }
 }
 
-// Получение HTML для символа
 function getSymbolHTML(symbol) {
     return `<img src="images/${symbol.file}" alt="${symbol.name}" class="symbol-img">`;
 }
 
-// Анимация вращения
 function spinAnimation() {
     return new Promise(resolve => {
         let spins = 0;
@@ -82,12 +73,10 @@ function spinAnimation() {
     });
 }
 
-// Получение символа по индексу
 function getSymbolByIndex(index) {
     return symbols[index];
 }
 
-// Получение имени файла из HTML
 function getSymbolFromReel(reel) {
     const img = reel.querySelector('img');
     if (!img) return symbols[0];
@@ -96,7 +85,6 @@ function getSymbolFromReel(reel) {
     return symbols.find(s => s.file === src) || symbols[0];
 }
 
-// Проверка выигрыша
 function checkWin(sym1, sym2, sym3, bet) {
     if (sym1.name === sym2.name && sym2.name === sym3.name) {
         return bet * sym1.multiplier;
@@ -107,7 +95,6 @@ function checkWin(sym1, sym2, sym3, bet) {
     return 0;
 }
 
-// Основная функция вращения
 async function spin() {
     if (isSpinning) return;
     
@@ -158,24 +145,22 @@ async function spin() {
         resultEl.className = 'result win';
         
         if (final1.name === 'jackpot' && final2.name === 'jackpot' && final3.name === 'jackpot') {
-            resultEl.textContent = '🎉 ДЖЕКПОТ! x10 🎉';
+            resultEl.textContent = 'ДЖЕКПОТ! x10';
         } else {
-            resultEl.textContent = `🎉 ВЫИГРЫШ: +${winAmount} ₴ 🎉`;
+            resultEl.textContent = `ВЫИГРЫШ: +${winAmount} ₴ `;
         }
     } else {
         resultEl.className = 'result lose';
-        resultEl.textContent = `😔 ПРОИГРЫШ: -${bet} ₴`;
+        resultEl.textContent = `ПРОИГРЫШ: -${bet} ₴`;
     }
     
     isSpinning = false;
     spinBtn.disabled = false;
 }
 
-// Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     loadBalance();
-    
-    // Устанавливаем начальные изображения
+
     reel1.innerHTML = getSymbolHTML(symbols[0]);
     reel2.innerHTML = getSymbolHTML(symbols[0]);
     reel3.innerHTML = getSymbolHTML(symbols[0]);

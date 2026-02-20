@@ -8,7 +8,7 @@ const socket = io({
 
 let currentRecipient = "себе";
 let mySocketId = null;
-let messageQueue = new Set(); // Очередь отправленных сообщений
+let messageQueue = new Set();
 
 // Элементы DOM
 const messagesDiv = document.getElementById('messages');
@@ -58,23 +58,17 @@ socket.on('connect_error', function(error) {
 socket.on('message', function(data) {
     console.log('Получено сообщение от сервера:', data);
     
-    // Проверяем, не отправили ли мы это сообщение сами
-    // Используем несколько методов проверки
-    
-    // 1. Проверка по ID в очереди
     if (data.id && messageQueue.has(data.id)) {
         console.log('Это наше сообщение (по ID), пропускаем');
-        messageQueue.delete(data.id); // Удаляем из очереди
+        messageQueue.delete(data.id);
         return;
     }
     
-    // 2. Проверка по отправителю
     if (data.sender === 'Я' || data.sender === mySocketId || data.sender === socket.id) {
         console.log('Это наше сообщение (по отправителю), пропускаем');
         return;
     }
     
-    // 3. Если сообщение от другого - показываем
     console.log('Сообщение от другого пользователя, показываем');
     addMessage(data, false);
 });
@@ -99,13 +93,12 @@ function sendMessage() {
     
     if (!text) return;
     
-    // Создаем уникальный ID для сообщения
     const messageId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
     
     const message = {
         id: messageId,
-        sender: mySocketId || 'temp-' + Date.now(), // Используем socket.id если есть
-        senderName: 'Я', // Имя для отображения
+        sender: mySocketId || 'temp-' + Date.now(),
+        senderName: 'Я',
         recipient: currentRecipient,
         text: text,
         time: new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})
@@ -113,19 +106,14 @@ function sendMessage() {
     
     console.log('Отправляем сообщение:', message);
     
-    // Добавляем ID в очередь отправленных
     messageQueue.add(messageId);
-    
-    // Отправляем на сервер
     socket.emit('message', message);
     
-    // Показываем в чате локально (сразу)
     addMessage({
         ...message,
-        sender: 'Я' // Для отображения используем 'Я'
+        sender: 'Я'
     }, true);
     
-    // Очищаем поле ввода
     messageInput.value = '';
 }
 
@@ -137,7 +125,6 @@ function addMessage(data, isOwn) {
     const messageElement = document.createElement('div');
     messageElement.className = `message ${isOwn ? 'own' : 'their'}`;
     
-    // Определяем отправителя для отображения
     let displaySender = data.senderName || data.sender;
     if (displaySender === mySocketId) {
         displaySender = 'Я';
@@ -146,11 +133,9 @@ function addMessage(data, isOwn) {
     messageElement.innerHTML = `<b>${displaySender}</b> (${data.time})<br>${data.text}`;
     messagesDiv.appendChild(messageElement);
     
-    // Прокручиваем вниз
     messagesDiv.scrollTop = messagesDiv.scrollHeight;
 }
 
-// Для отладки - добавляем кнопку очистки очереди (можно убрать)
 window.clearMessageQueue = function() {
     messageQueue.clear();
     console.log('Очередь сообщений очищена');

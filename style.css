@@ -194,3 +194,24 @@ button {
 button:hover {
     background: #2980b9;
 }
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+}
+
+.casino-link {
+    background: #ffd700;
+    color: #1a1a2e;
+    text-decoration: none;
+    padding: 5px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.3s;
+}
+
+.casino-link:hover {
+    background: #ffa500;
+    transform: scale(1.05);
+}

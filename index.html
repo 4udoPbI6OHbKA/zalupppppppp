@@ -2,15 +2,20 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Whats App2</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-
 </head>
 <body>
     
 <div class="status-bar">
-    Статус: <span id="connection-status">Офлайн</span>
+    <div class="status-left">
+        Статус: <span id="connection-status">Офлайн</span>
+    </div>
+    <div class="nav-links">
+        <a href="casino.html" class="casino-link" target="_blank">🎰 КАЗИНО</a>
+    </div>
 </div>
 
 <div class="title">
@@ -19,10 +24,10 @@
 </div>
 
 <div class="container">
-
     <div class="contacts">
         <h3>Контакты</h3>
         <div class="contact online" onclick="setRecipient('с собой')">себе</div>
+        <div class="contact online" onclick="setRecipient('всем')">общий чат</div>
     </div>
 
     <div class="chat">

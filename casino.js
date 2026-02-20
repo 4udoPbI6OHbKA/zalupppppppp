@@ -2,19 +2,19 @@
 let balance = 10000;
 let isSpinning = false;
 
-// Символы для слотов
-const symbols = ['🍒', '🍊', '🍇', '🍋', '7️⃣', '💎', '🎰'];
+// Пути к изображениям
+const symbols = [
+    { file: 'cherry.png', name: 'cherry', multiplier: 2 },
+    { file: 'orange.png', name: 'orange', multiplier: 3 },
+    { file: 'grape.png', name: 'grape', multiplier: 4 },
+    { file: 'lemon.png', name: 'lemon', multiplier: 3 },
+    { file: 'seven.png', name: 'seven', multiplier: 7 },
+    { file: 'diamond.png', name: 'diamond', multiplier: 6 },
+    { file: 'jackpot.png', name: 'jackpot', multiplier: 10 }
+];
 
-// Множители выигрыша
-const multipliers = {
-    '🎰': 10,
-    '7️⃣': 7,
-    '💎': 6,
-    '🍇': 5,
-    '🍊': 4,
-    '🍋': 3,
-    '🍒': 2
-};
+// Для обратной совместимости с эмодзи (оставляем для определения множителей)
+const symbolNames = ['cherry', 'orange', 'grape', 'lemon', 'seven', 'diamond', 'jackpot'];
 
 // Элементы DOM
 const balanceEl = document.getElementById('balance');
@@ -46,6 +46,11 @@ function updateBalance() {
     }
 }
 
+// Получение HTML для символа
+function getSymbolHTML(symbol) {
+    return `<img src="images/${symbol.file}" alt="${symbol.name}" class="symbol-img">`;
+}
+
 // Анимация вращения
 function spinAnimation() {
     return new Promise(resolve => {
@@ -57,9 +62,13 @@ function spinAnimation() {
         reel3.classList.add('spinning');
         
         const interval = setInterval(() => {
-            reel1.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            reel2.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-            reel3.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+            const random1 = symbols[Math.floor(Math.random() * symbols.length)];
+            const random2 = symbols[Math.floor(Math.random() * symbols.length)];
+            const random3 = symbols[Math.floor(Math.random() * symbols.length)];
+            
+            reel1.innerHTML = getSymbolHTML(random1);
+            reel2.innerHTML = getSymbolHTML(random2);
+            reel3.innerHTML = getSymbolHTML(random3);
             
             spins++;
             if (spins >= maxSpins) {
@@ -73,13 +82,26 @@ function spinAnimation() {
     });
 }
 
+// Получение символа по индексу
+function getSymbolByIndex(index) {
+    return symbols[index];
+}
+
+// Получение имени файла из HTML
+function getSymbolFromReel(reel) {
+    const img = reel.querySelector('img');
+    if (!img) return symbols[0];
+    
+    const src = img.src.split('/').pop();
+    return symbols.find(s => s.file === src) || symbols[0];
+}
+
 // Проверка выигрыша
 function checkWin(sym1, sym2, sym3, bet) {
-    if (sym1 === sym2 && sym2 === sym3) {
-        const multiplier = multipliers[sym1] || 2;
-        return bet * multiplier;
+    if (sym1.name === sym2.name && sym2.name === sym3.name) {
+        return bet * sym1.multiplier;
     }
-    else if (sym1 === sym2 || sym2 === sym3 || sym1 === sym3) {
+    else if (sym1.name === sym2.name || sym2.name === sym3.name || sym1.name === sym3.name) {
         return bet * 1.5;
     }
     return 0;
@@ -123,9 +145,9 @@ async function spin() {
     const final2 = symbols[Math.floor(Math.random() * symbols.length)];
     const final3 = symbols[Math.floor(Math.random() * symbols.length)];
     
-    reel1.textContent = final1;
-    reel2.textContent = final2;
-    reel3.textContent = final3;
+    reel1.innerHTML = getSymbolHTML(final1);
+    reel2.innerHTML = getSymbolHTML(final2);
+    reel3.innerHTML = getSymbolHTML(final3);
     
     const winAmount = checkWin(final1, final2, final3, bet);
     
@@ -135,10 +157,8 @@ async function spin() {
         saveBalance();
         resultEl.className = 'result win';
         
-        if (final1 === '🎰' && final2 === '🎰' && final3 === '🎰') {
+        if (final1.name === 'jackpot' && final2.name === 'jackpot' && final3.name === 'jackpot') {
             resultEl.textContent = '🎉 ДЖЕКПОТ! x10 🎉';
-        } else if (final1 === final2 && final2 === final3) {
-            resultEl.textContent = `🎉 ВЫИГРЫШ: +${winAmount} ₴ 🎉`;
         } else {
             resultEl.textContent = `🎉 ВЫИГРЫШ: +${winAmount} ₴ 🎉`;
         }
@@ -154,6 +174,11 @@ async function spin() {
 // Инициализация
 document.addEventListener('DOMContentLoaded', function() {
     loadBalance();
+    
+    // Устанавливаем начальные изображения
+    reel1.innerHTML = getSymbolHTML(symbols[0]);
+    reel2.innerHTML = getSymbolHTML(symbols[0]);
+    reel3.innerHTML = getSymbolHTML(symbols[0]);
     
     if (betInput) {
         betInput.addEventListener('input', function() {

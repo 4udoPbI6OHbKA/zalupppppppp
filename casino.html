@@ -3,18 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Joy Casino</title>
+    <title>БУРМАЛДА</title>
     <link rel="stylesheet" href="casino.css">
 </head>
 <body>
     <div class="casino-container">
         <div class="casino-header">
-            <div class="header-left">
-                <a href="/" class="back-link">← Назад в чат</a>
-                <div class="casino-title">
-                    🎰 LUCKY JOY CASINO
-                </div>
-            </div>
+            <a href="/" class="back-link">← Назад в чат</a>
             <div class="casino-balance">
                 <span>💰</span> <span id="balance">10000</span> ₴
             </div>
@@ -33,48 +28,17 @@
                     <input type="number" id="betAmount" min="10" max="1000" value="100" step="10">
                 </div>
                 <button class="spin-btn" id="spinBtn" onclick="spin()">
-                    🎰 КРУТИТЬ
+                    КРУТИТЬ
                 </button>
             </div>
 
             <div class="result" id="result"></div>
         </div>
-
-        <div class="stats">
-            <div class="stat-box">
-                <div class="stat-label">Сыграно игр</div>
-                <div class="stat-value" id="gamesPlayed">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Выигрышей</div>
-                <div class="stat-value" id="winsCount">0</div>
-            </div>
-            <div class="stat-box">
-                <div class="stat-label">Макс. выигрыш</div>
-                <div class="stat-value" id="maxWin">0 ₴</div>
-            </div>
-        </div>
-
-        <div class="history">
-            <h3>📜 История последних игр</h3>
-            <div class="history-list" id="historyList"></div>
-        </div>
-
-        <div class="paytable">
-            <h3>💰 Таблица выплат</h3>
-            <div class="paytable-grid">
-                <div class="pay-item"><span class="symbol">🎰</span> Джекпот x10</div>
-                <div class="pay-item"><span class="symbol">7️⃣</span> Семерки x7</div>
-                <div class="pay-item"><span class="symbol">💎</span> Бриллианты x6</div>
-                <div class="pay-item"><span class="symbol">🍇</span> Виноград x5</div>
-                <div class="pay-item"><span class="symbol">🍊</span> Апельсины x4</div>
-                <div class="pay-item"><span class="symbol">🍋</span> Лимоны x3</div>
-                <div class="pay-item"><span class="symbol">🍒</span> Вишни x2</div>
-                <div class="pay-item"><span class="symbol">🎰🎰</span> Два символа x1.5</div>
-            </div>
-        </div>
     </div>
 
+    <script src="casino.js"></script>
+</body>
+</html>
     <script src="casino.js"></script>
 </body>
 </html>
